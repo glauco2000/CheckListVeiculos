@@ -182,67 +182,88 @@
     async function buscarNoBanco(placa) {
         const pL = placa.toUpperCase().trim().replace(/\s|-/g, "");
         if(pL.length < 7) return alert("Digite a placa completa.");
+        
         const msg = document.getElementById('msg-busca');
-        msg.innerText = "🔍 Buscando..."; msg.style.display = "block"; msg.style.color = "blue";
+        msg.innerText = "🔍 Buscando..."; 
+        msg.style.display = "block"; 
+        msg.style.color = "blue";
+        
         const url = `https://docs.google.com/spreadsheets/d/e/2PACX-1vSUkef16uS7zkNGdMNXGDnG1N-2nwTqok1N04fAXDAbexU8oqDvOKsqwOPEzoUB223KLFMYa6zzg60V/pub?gid=1789185035&single=true&output=csv`;
+        
         try {
             const r = await fetch(url);
             const txt = await r.text();
             const linhas = txt.split('\n').map(l => l.split(',').map(c => c.replace(/"/g, "").trim()));
             const v = linhas.find(cols => cols[0].replace(/\s|-/g, "").toUpperCase() === pL);
+            
             if (v) {
                 placaAtiva = pL;
                 document.getElementById('chassi').value = v[1]; 
                 document.getElementById('modeloVeiculo').value = v[2];
                 document.getElementById('empresa').value = v[3]; 
                 document.getElementById('cnpj').value = v[4];
-                msg.innerText = "✅ Veículo Localizado!"; msg.style.color = "green";
+                
+                msg.innerText = "✅ Veículo Localizado!"; 
+                msg.style.color = "green";
                 
                 gerarCamposFotos(v[2]);
                 document.getElementById('secaoFotos').style.display = "block";
             } else {
-                msg.innerText = "❌ Placa não cadastrada!"; msg.style.color = "red";
+                msg.innerText = "❌ Placa não cadastrada!"; 
+                msg.style.color = "red";
                 document.getElementById('secaoFotos').style.display = "none";
             }
-        } catch (e) { msg.innerText = "⚠️ Erro de conexão."; }
+        } catch (e) { 
+            msg.innerText = "⚠️ Erro: " + (e.message || "Falha desconhecida no JS"); 
+            msg.style.color = "red"; 
+        }
     }
 
     function gerarCamposFotos(modelo) {
-        const grid = document.getElementById('gridFotos');
-        grid.innerHTML = "";
-        let fotosExigidas = null;
-        let prefixo = "";
-
-        const modeloUpper = modelo.toUpperCase();
-
-        if (modeloUpper.includes("CAMINHAO")) {
-            fotosExigidas = mapeamentoPorMarca["CAMINHAO"];
-            marcaAtiva = "CAMINHAO";
-            prefixo = "nextem_";
-        } else if (modeloUpper.includes("RAP")) {
-            fotosExigidas = mapeamentoPorMarca["RAP"];
-            marcaAtiva = "RAP";
-            prefixo = "rap_";
-        }
-
-        if (!fotosExigidas) {
-            grid.innerHTML = "<p style='color:red;'>Nenhum mapeamento de fotos encontrado para este modelo.</p>";
-            return;
-        }
-
-        for (const [nomeAmigavel, nomeArquivo] of Object.entries(fotosExigidas)) {
-            const chaveScript = chavesPropriedades[nomeAmigavel];
-            const caminhoRef = "./img/" + prefixo + nomeArquivo;
+        try {
+            const grid = document.getElementById('gridFotos');
+            if (!grid) throw new Error("A div gridFotos não existe no HTML.");
             
-            grid.innerHTML += `
-                <div class="photo-item">
-                    <label>📷 ${nomeAmigavel}</label>
-                    <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onerror="this.style.display='none'">
-                    <input type="file" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" required>
-                    <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('ref_${chaveScript}').nextElementSibling.click()">
-                    <p id="hint_${chaveScript}" class="hint-refazer">Clique na imagem para refazer</p>
-                </div>
-            `;
+            grid.innerHTML = "";
+            let fotosExigidas = null;
+            let prefixo = "";
+
+            const modeloUpper = String(modelo).toUpperCase();
+
+            if (modeloUpper.indexOf("CAMINHAO") !== -1) {
+                fotosExigidas = mapeamentoPorMarca["CAMINHAO"];
+                marcaAtiva = "CAMINHAO";
+                prefixo = "nextem_";
+            } else if (modeloUpper.indexOf("RAP") !== -1) {
+                fotosExigidas = mapeamentoPorMarca["RAP"];
+                marcaAtiva = "RAP";
+                prefixo = "rap_";
+            }
+
+            if (!fotosExigidas) {
+                grid.innerHTML = "<p style='color:red;'>Nenhum mapeamento de fotos para este modelo.</p>";
+                return;
+            }
+
+            const chaves = Object.keys(fotosExigidas);
+            for (let i = 0; i < chaves.length; i++) {
+                const nomeAmigavel = chaves[i];
+                const nomeArquivo = fotosExigidas[nomeAmigavel];
+                const chaveScript = chavesPropriedades[nomeAmigavel] || "fotoDesconhecida";
+                const caminhoRef = "./img/" + prefixo + nomeArquivo;
+                
+                grid.innerHTML += `
+                    <div class="photo-item">
+                        <label>📷 ${nomeAmigavel}</label>
+                        <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onerror="this.style.display='none'">
+                        <input type="file" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" required>
+                        <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('ref_${chaveScript}').nextElementSibling.click()">
+                        <p id="hint_${chaveScript}" class="hint-refazer">Clique na imagem para refazer</p>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            throw new Error("Problema ao desenhar fotos: " + err.message);
         }
     }
 
