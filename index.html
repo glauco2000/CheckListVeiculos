@@ -221,7 +221,10 @@
         
         listaEtiquetas.forEach((label, i) => {
             const nomeArquivo = mapeamentoPorMarca[marcaAtiva][label] || "";
-            const caminhoRef = nomeArquivo ? "./img/" + prefixo + nomeArquivo : "";
+            
+            // Caminho atualizado apontando para o conteúdo Raw do GitHub
+            const caminhoRef = nomeArquivo ? "https://raw.githubusercontent.com/glauco2000/CheckListVeiculos/main/img/" + prefixo + nomeArquivo : "";
+            
             const chaveInput = chavesPropriedades[label] || `foto${i+1}`;
             
             grid.innerHTML += `
@@ -234,7 +237,7 @@
                 </div>`;
         });
     }
-
+    
     function pegarLocalizacao() {
         const btn = document.getElementById('btn-gps');
         btn.disabled = true; btn.innerText = "CALIBRANDO GPS...";
