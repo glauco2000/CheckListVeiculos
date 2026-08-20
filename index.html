@@ -222,22 +222,23 @@
         listaEtiquetas.forEach((label, i) => {
             const nomeArquivo = mapeamentoPorMarca[marcaAtiva][label] || "";
             
-            // Caminho atualizado apontando para o conteúdo Raw do GitHub
-            const caminhoRef = nomeArquivo ? "https://raw.githubusercontent.com/glauco2000/CheckListVeiculos/main/img/" + prefixo + nomeArquivo : "";
+            // Utilizando jsDelivr para contornar bloqueios de CORS do GitHub
+            const caminhoRef = nomeArquivo ? "https://cdn.jsdelivr.net/gh/glauco2000/CheckListVeiculos@main/img/" + prefixo + nomeArquivo : "";
             
             const chaveInput = chavesPropriedades[label] || `foto${i+1}`;
             
             grid.innerHTML += `
                 <div class="photo-item">
                     <label>📷 ${label}</label>
-                    <img id="ref_${chaveInput}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('file_${chaveInput}').click()" title="Toque para tirar foto" onerror="this.style.display='none'">
+                    <!-- Comando onerror removido para facilitar diagnóstico visual -->
+                    <img id="ref_${chaveInput}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('file_${chaveInput}').click()" title="Toque para tirar foto">
                     <input type="file" id="file_${chaveInput}" accept="image/*" capture="camera" onchange="compactar(this, '${chaveInput}')" required style="margin-top:10px;">
                     <img id="v_${chaveInput}" class="preview-img" onclick="document.getElementById('file_${chaveInput}').click()" title="Clique para refazer">
                     <p id="hint_${chaveInput}" class="hint-refazer">Toque na foto acima para refazer</p>
                 </div>`;
         });
     }
-    
+
     function pegarLocalizacao() {
         const btn = document.getElementById('btn-gps');
         btn.disabled = true; btn.innerText = "CALIBRANDO GPS...";
