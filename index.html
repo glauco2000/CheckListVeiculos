@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preload" href="./Font/fauna-thin.ttf" as=\"font\" type=\"font/ttf\" crossorigin>
+    <link rel="preload" href="./Font/fauna-thin.ttf" as="font" type="font/ttf" crossorigin>
 
     <title>Checklist LOCADORA Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
@@ -55,7 +55,7 @@
         .btn-gps { background: #00ffcc; color: #000; }
         .btn-secondary { background: #444; color: #fff; margin-top: 10px; font-size: 14px; }
         
-        #loading { display: fixed; display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); color: #00ffcc; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #00ffcc; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -148,7 +148,6 @@
         "RAP": { "Foto Frente": "frente.jpg", "Foto Lateral Direita": "lat_dir.jpg", "Foto Traseira": "traseira.jpg", "Foto Lateral Esquerda": "lat_esq.jpg", "Foto Placa": "placa.jpg", "Foto Chassi": "chassi.jpg", "Foto Painel/KM (LIGADO)": "painel.jpg", "Foto Banco (assento)": "banco.jpg", "Foto Interna do Baú": "bau.jpg" }
     };
 
-    // Mapeamento exato de chaves de propriedades exigidas pelo seu Apps Script v3
     const chavesPropriedades = {
         "Foto Frente": "fotoFrente",
         "Foto Lateral Direita": "fotoLatDir", 
@@ -160,11 +159,7 @@
         "Foto Cabine interna": "fotoCabine", 
         "Foto Banco (assento)": "fotoBanco", 
         "Foto Interna do Baú": "fotoBau",
-
     };
-
-    const fotosNextem = ["Foto Frente", "Foto Lateral Direita", "Foto Traseira", "Foto Lateral Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM (LIGADO)", "Foto Cabine interna", "Foto Interna do Baú"];
-    const fotosRap = ["Foto Frente", "Foto Lateral Direita", "Foto Traseira", "Foto Lateral Esquerda", "Foto Placa", "Foto Chassi", "Foto Painel/KM (LIGADO)", "Foto Banco (assento)", "Foto Interna do Baú"];
 
     itens.forEach(it => { 
         document.getElementById('corpoTabela').innerHTML += `<tr><td style="text-align:left">${it}</td><td><input type="radio" name="${it}" value="Ok" required></td><td><input type="radio" name="${it}" value="Não Ok"></td><td><input type="radio" name="${it}" value="N/A"></td></tr>`; 
@@ -212,7 +207,44 @@
         } catch (e) { msg.innerText = "⚠️ Erro de conexão."; }
     }
 
-    
+    function gerarCamposFotos(modelo) {
+        const grid = document.getElementById('gridFotos');
+        grid.innerHTML = "";
+        let fotosExigidas = null;
+        let prefixo = "";
+
+        const modeloUpper = modelo.toUpperCase();
+
+        if (modeloUpper.includes("CAMINHAO")) {
+            fotosExigidas = mapeamentoPorMarca["CAMINHAO"];
+            marcaAtiva = "CAMINHAO";
+            prefixo = "nextem_";
+        } else if (modeloUpper.includes("RAP")) {
+            fotosExigidas = mapeamentoPorMarca["RAP"];
+            marcaAtiva = "RAP";
+            prefixo = "rap_";
+        }
+
+        if (!fotosExigidas) {
+            grid.innerHTML = "<p style='color:red;'>Nenhum mapeamento de fotos encontrado para este modelo.</p>";
+            return;
+        }
+
+        for (const [nomeAmigavel, nomeArquivo] of Object.entries(fotosExigidas)) {
+            const chaveScript = chavesPropriedades[nomeAmigavel];
+            const caminhoRef = "./img/" + prefixo + nomeArquivo;
+            
+            grid.innerHTML += `
+                <div class="photo-item">
+                    <label>📷 ${nomeAmigavel}</label>
+                    <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onerror="this.style.display='none'">
+                    <input type="file" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" required>
+                    <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('ref_${chaveScript}').nextElementSibling.click()">
+                    <p id="hint_${chaveScript}" class="hint-refazer">Clique na imagem para refazer</p>
+                </div>
+            `;
+        }
+    }
 
     function pegarLocalizacao() {
         const btn = document.getElementById('btn-gps');
@@ -290,7 +322,6 @@
             checks[it] = el ? el.value : "N/A"; 
         });
 
-        // Montagem do payload compatível dinamicamente com o Apps Script v3
         const payload = { 
             ...fotos, 
             checklistItems: checks, 
