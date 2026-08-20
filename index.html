@@ -92,7 +92,7 @@
             <label>CNPJ</label><input type="text" id="cnpj" readonly>
             <label>Usuário (digite seu nome completo) *</label><input type="text" id="usuario" placeholder=" Ex: André da Silva" minlength="10" maxlength="60"  onfocus="this.placeholder = ''"  onblur="this.placeholder = ' Ex: André da Silva'"  required>
             <label>Telefone *</label><input type="tel" id="telefone" oninput="maskTel(this)" required maxlength="15">
-            <label>Email *</label><input type="email" id="email" oninput="maskTel(this)" required maxlength="60">
+            <label>Email *</label><input type="email" id="email" required maxlength="60">
             <label>Data *</label><input type="date" id="dataRecebimento" required>
 
             <h3>Condições do Veículo *</h3>
@@ -323,6 +323,7 @@
             cnpj: document.getElementById("cnpj").value,
             usuario: document.getElementById("usuario").value,
             telefone: document.getElementById("telefone").value,
+            email: document.getElementById("email").value,
             dataRecebimento: document.getElementById("dataRecebimento").value,
             dano: document.getElementById("dano").value,
             desc: document.getElementById("desc").value,
