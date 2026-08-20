@@ -144,7 +144,7 @@
     const itens = ["Pintura e Lataria", "Pneus", "Rodas", "Parabrisa e palhetas", "Retrovisores", "Documentação", "Chave do veiculo e baú", "Kit de ferramentas", "Adesivos e Etiquetas", "Painel e Cabine", "Estação de Recarga portátil", "Luzes externas", "Luzes internas", "Ar-condicionado", "Vidros e travas elétricas", "Kit Reparo do Pneu", "Central Multimidia"];
     
     const mapeamentoPorMarca = {
-        "NEXTEM": { "Foto Frente": "frente.jpg", "Foto Lateral Direita": "lat_dir.jpg", "Foto Traseira": "traseira.jpg", "Foto Lateral Esquerda": "lat_esq.jpg", "Foto Placa": "placa.jpg", "Foto Chassi": "chassi.jpg", "Foto Painel/KM (LIGADO)": "painel.jpg", "Foto Cabine interna": "cabine.jpg", "Foto Interna do Baú": "bau.jpg" },
+        "CAMINHAO": { "Foto Frente": "frente.jpg", "Foto Lateral Direita": "lat_dir.jpg", "Foto Traseira": "traseira.jpg", "Foto Lateral Esquerda": "lat_esq.jpg", "Foto Placa": "placa.jpg", "Foto Chassi": "chassi.jpg", "Foto Painel/KM (LIGADO)": "painel.jpg", "Foto Cabine interna": "cabine.jpg", "Foto Interna do Baú": "bau.jpg" },
         "RAP": { "Foto Frente": "frente.jpg", "Foto Lateral Direita": "lat_dir.jpg", "Foto Traseira": "traseira.jpg", "Foto Lateral Esquerda": "lat_esq.jpg", "Foto Placa": "placa.jpg", "Foto Chassi": "chassi.jpg", "Foto Painel/KM (LIGADO)": "painel.jpg", "Foto Banco (assento)": "banco.jpg", "Foto Interna do Baú": "bau.jpg" }
     };
 
@@ -212,32 +212,7 @@
         } catch (e) { msg.innerText = "⚠️ Erro de conexão."; }
     }
 
-    function gerarCamposFotos(modelo) {
-        const grid = document.getElementById('gridFotos'); 
-        grid.innerHTML = "";
-        marcaAtiva = modelo.toUpperCase().includes("NEXTEM") ? "NEXTEM" : "RAP";
-        const prefixo = marcaAtiva.toLowerCase() + "_";
-        const listaEtiquetas = (marcaAtiva === "NEXTEM") ? fotosNextem : fotosRap;
-        
-        listaEtiquetas.forEach((label, i) => {
-            const nomeArquivo = mapeamentoPorMarca[marcaAtiva][label] || "";
-            
-            // Utilizando jsDelivr para contornar bloqueios de CORS do GitHub
-            const caminhoRef = nomeArquivo ? "https://cdn.jsdelivr.net/gh/glauco2000/CheckListVeiculos@main/img/" + prefixo + nomeArquivo : "";
-            
-            const chaveInput = chavesPropriedades[label] || `foto${i+1}`;
-            
-            grid.innerHTML += `
-                <div class="photo-item">
-                    <label>📷 ${label}</label>
-                    <!-- Comando onerror removido para facilitar diagnóstico visual -->
-                    <img id="ref_${chaveInput}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('file_${chaveInput}').click()" title="Toque para tirar foto">
-                    <input type="file" id="file_${chaveInput}" accept="image/*" capture="camera" onchange="compactar(this, '${chaveInput}')" required style="margin-top:10px;">
-                    <img id="v_${chaveInput}" class="preview-img" onclick="document.getElementById('file_${chaveInput}').click()" title="Clique para refazer">
-                    <p id="hint_${chaveInput}" class="hint-refazer">Toque na foto acima para refazer</p>
-                </div>`;
-        });
-    }
+    
 
     function pegarLocalizacao() {
         const btn = document.getElementById('btn-gps');
