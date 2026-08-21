@@ -259,7 +259,7 @@
                         <!-- Opção 1: Clicar na imagem de referência -->
                         <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('${idInput}').click()" onerror="this.style.display='none'">
                         
-                        <!-- Opção 2: Botão de arquivo visível com required -->
+                        <!-- Opção 2: Botão de arquivo com required -->
                         <input type="file" id="${idInput}" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" style="margin: 8px 0; display: block; width: 100%;" required>
                         
                         <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('${idInput}').click()">
@@ -341,13 +341,17 @@
         if(placaAtiva === "") return alert("Busque a placa primeiro!");
         if(pad.isEmpty()) return alert("Assine o checklist!");
 
-        // Validação estrita de todas as fotos obrigatórias do modelo ativo
+        // TRAVA ABSOLUTA DE FOTOS: Verifica tanto o objeto processado quanto o input file nativo
         if (marcaAtiva && mapeamentoPorMarca[marcaAtiva]) {
             const chavesExigidas = Object.keys(mapeamentoPorMarca[marcaAtiva]);
             for (let i = 0; i < chavesExigidas.length; i++) {
-                const chaveScript = chavesPropriedades[chavesExigidas[i]];
-                if (!fotos[chaveScript]) {
-                    alert("Por favor, tire todas as fotos obrigatórias antes de enviar: " + chavesExigidas[i]);
+                const nomeAmigavel = chavesExigidas[i];
+                const chaveScript = chavesPropriedades[nomeAmigavel];
+                const inputElement = document.getElementById("input_" + chaveScript);
+                
+                if (!fotos[chaveScript] || !inputElement || inputElement.files.length === 0) {
+                    alert("Atenção: A foto obrigatória não foi tirada ou anexada: " + nomeAmigavel);
+                    if (inputElement) inputElement.focus();
                     return;
                 }
             }
