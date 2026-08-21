@@ -251,13 +251,18 @@
                 const nomeArquivo = fotosExigidas[nomeAmigavel];
                 const chaveScript = chavesPropriedades[nomeAmigavel] || "fotoDesconhecida";
                 const caminhoRef = "./img/" + prefixo + nomeArquivo;
+                const idInput = "input_" + chaveScript;
                 
                 grid.innerHTML += `
                     <div class="photo-item">
                         <label>📷 ${nomeAmigavel}</label>
-                        <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onerror="this.style.display='none'">
-                        <input type="file" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" required>
-                        <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('ref_${chaveScript}').nextElementSibling.click()">
+                        <!-- Opção 1: Clicar na imagem de fundo de referência -->
+                        <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('${idInput}').click()" onerror="this.style.display='none'">
+                        
+                        <!-- Opção 2: Botão de arquivo visível -->
+                        <input type="file" id="${idInput}" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" style="margin: 8px 0; display: block; width: 100%;">
+                        
+                        <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('${idInput}').click()">
                         <p id="hint_${chaveScript}" class="hint-refazer">Clique na imagem para refazer</p>
                     </div>
                 `;
