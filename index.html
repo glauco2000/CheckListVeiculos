@@ -90,7 +90,7 @@
             <label>KM Atual *</label><input type="number" id="km" required oninput="if(this.value.length > 8) this.value = this.value.slice(0, 8);">
             <label>Cliente</label><input type="text" id="empresa" readonly>
             <label>CNPJ</label><input type="text" id="cnpj" readonly>
-            <label>Usuário (digite seu nome completo) *</label><input type="text" id="usuario" placeholder=" Ex: André da Silva" minlength="10" maxlength="60"  onfocus="this.placeholder = ''"  onblur="this.placeholder = ' Ex: André da Silva'"  required>
+            <label>Usuário (digite seu nome completo) *</label><input type="text" id="usuario" placeholder=" Ex: André da Silva" minlength="10" maxlength="60" onfocus="this.placeholder = ''" onblur="this.placeholder = ' Ex: André da Silva'" required>
             <label>Telefone *</label><input type="tel" id="telefone" oninput="maskTel(this)" required maxlength="15">
             <label>Email *</label><input type="email" id="email" required maxlength="60">
             <label>Data *</label><input type="date" id="dataRecebimento" required>
@@ -255,12 +255,12 @@
                 
                 grid.innerHTML += `
                     <div class="photo-item">
-                        <label>📷 ${nomeAmigavel}</label>
-                        <!-- Opção 1: Clicar na imagem de fundo de referência -->
+                        <label>📷 ${nomeAmigavel} *</label>
+                        <!-- Opção 1: Clicar na imagem de referência -->
                         <img id="ref_${chaveScript}" src="${caminhoRef}" class="ref-img" onclick="document.getElementById('${idInput}').click()" onerror="this.style.display='none'">
                         
-                        <!-- Opção 2: Botão de arquivo visível -->
-                        <input type="file" id="${idInput}" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" style="margin: 8px 0; display: block; width: 100%;">
+                        <!-- Opção 2: Botão de arquivo visível com required -->
+                        <input type="file" id="${idInput}" accept="image/*" capture="environment" onchange="compactar(this, '${chaveScript}')" style="margin: 8px 0; display: block; width: 100%;" required>
                         
                         <img id="v_${chaveScript}" class="preview-img" onclick="document.getElementById('${idInput}').click()">
                         <p id="hint_${chaveScript}" class="hint-refazer">Clique na imagem para refazer</p>
@@ -340,6 +340,19 @@
         e.preventDefault();
         if(placaAtiva === "") return alert("Busque a placa primeiro!");
         if(pad.isEmpty()) return alert("Assine o checklist!");
+
+        // Validação estrita de todas as fotos obrigatórias do modelo ativo
+        if (marcaAtiva && mapeamentoPorMarca[marcaAtiva]) {
+            const chavesExigidas = Object.keys(mapeamentoPorMarca[marcaAtiva]);
+            for (let i = 0; i < chavesExigidas.length; i++) {
+                const chaveScript = chavesPropriedades[chavesExigidas[i]];
+                if (!fotos[chaveScript]) {
+                    alert("Por favor, tire todas as fotos obrigatórias antes de enviar: " + chavesExigidas[i]);
+                    return;
+                }
+            }
+        }
+
         document.getElementById("loading").style.display = "flex";
         
         const checks = {};
